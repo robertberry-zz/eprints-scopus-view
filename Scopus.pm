@@ -67,7 +67,9 @@ sub render {
 
     # Set up search form
     {
-        my ($search_form, $search_input, $search_submit);
+        my ($search_form, $search_input, $search_submit, $submit_phrase);
+
+        $submit_phrase = $self->html_phrase("searchSubmit")->toString();
 
         $search_form = $session->make_element("form",
                                                 name => SEARCH_FORM_ID,
@@ -78,7 +80,7 @@ sub render {
                                                  name => SEARCH_INPUT_ID);
         $search_submit = $session->make_element("input",
                                                   type => "submit",
-                                                  value => "Search");
+                                                  value => $submit_phrase);
         $search_form->appendChild($search_input);
         $search_form->appendChild($search_submit);
         $html->appendChild($search_form);
