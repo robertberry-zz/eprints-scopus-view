@@ -12,12 +12,13 @@ Developed for the University of Liverpool Institutional Repository. GPL licensed
   
 ## Setting up Scopus Metadata Selector JavaScript
 
-Follow the steps for building the JavaScript with your API key. Copy the
-contents of the `build/scripts` folder to `cfg/static/javascript` inside the
-archive for which you are installing the plug in.
+* Follow the steps for building the JavaScript with your API key
+* Rename `build/scripts/main.js` to `build/scripts/scopus_selector.js`
+* Copy contents of `build/scripts` to your archive's JS folder (i.e. `cfg/static/javascript`)
 
 ## Installation
 
+* Set up Scopus Metadata Selector JS (see above)
 * Copy Scopus.pm to `cfg/plugins/EPrints/Plugin/Screen` (make the directories
   if they do not exist).
 * Copy scopus_view.xml to `cfg/lang/en/phrases`.

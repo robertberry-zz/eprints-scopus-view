@@ -47,6 +47,7 @@ Returns whether current user can view the page this Plugin renders.
 sub can_be_viewed {
     my $self = shift;
 
+    # Only allow users who can create EPrints to view the plug in, as it's for imports.
     return $self->allow("create_eprint");
 }
 
@@ -59,11 +60,13 @@ Renders the view, returning HTML.
 sub render {
     my $self = shift;
 
-    my ($session, $user, $html);
+    my ($session, $user, $html, $elem);
 
     $session = $self->{session};
     $user = $session->current_user;
     $html = $session->make_doc_fragment;
+
+    $elem = sub { $session->make_element(@_); };
 
     # Set up search form
     {
@@ -71,28 +74,27 @@ sub render {
 
         $submit_phrase = $self->html_phrase("searchSubmit")->toString();
 
-        $search_form = $session->make_element("form",
-                                                name => SEARCH_FORM_ID,
-                                                id => SEARCH_FORM_ID,
-                                                action => "");
-        $search_input = $session->make_element("input",
-                                                 type => "text",
-                                                 name => SEARCH_INPUT_ID);
-        $search_submit = $session->make_element("input",
-                                                  type => "submit",
-                                                  value => $submit_phrase);
+        $search_form = $elem->("form",
+                               name => SEARCH_FORM_ID,
+                               id => SEARCH_FORM_ID,
+                               action => "");
+        $search_input = $elem->("input",
+                                type => "text",
+                                name => SEARCH_INPUT_ID);
+        $search_submit = $elem->("input",
+                                 type => "submit",
+                                 value => $submit_phrase);
         $search_form->appendChild($search_input);
         $search_form->appendChild($search_submit);
         $html->appendChild($search_form);
-
     }
 
     # Set up results container
     {
         my $results;
 
-        $results = $session->make_element("div",
-                                            id => RESULTS_CONTAINER_ID);
+        $results = $elem->("div",
+                           id => RESULTS_CONTAINER_ID);
         $html->appendChild($results);
     }
 
@@ -100,12 +102,26 @@ sub render {
     {
         my $import_form;
 
-        $import_form = $session->make_element("form",
-                                                name => IMPORT_FORM_ID,
-                                                id => IMPORT_FORM_ID,
-                                                action => "",
-                                                method => "POST");
+        $import_form = $elem->("form",
+                               name => IMPORT_FORM_ID,
+                               id => IMPORT_FORM_ID,
+                               action => "",
+                               method => "POST");
         $html->appendChild($import_form);
+    }
+
+    # Add JavaScript to page
+    {
+        my ($scopus_js, $require_js);
+
+        $scopus_js = $elem->("script",
+                             src => "http://api.elsevier.com/javascript/scopussearch.jsp");
+        $require_js = $elem->("script",
+                              src => "/javascript/libs/require/require.js",
+                              "data-main" => "/javascript/scopus_selector");
+
+        $html->appendChild($scopus_js);
+        $html->appendChild($require_js);
     }
 
     return $html;
