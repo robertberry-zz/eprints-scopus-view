@@ -12,6 +12,7 @@ use constant SEARCH_FORM_ID => "sciverse_search_form";
 use constant SEARCH_INPUT_ID => "sciverse_search_string";
 use constant RESULTS_CONTAINER_ID => "sciverse";
 use constant IMPORT_FORM_ID => "sciverse_submit_form";
+use constant IMPORT_FORM_TARGET => "/cgi/users/home#t";
 
 @ISA = ('EPrints::Plugin::Screen');
 
@@ -100,13 +101,36 @@ sub render {
 
     # Set up import form
     {
-        my $import_form;
+        my ($import_form, $format_input, $screen_input, $form_action);
+
+        # Pretend like we're the normal import form on the Manage Deposits screen.
+        $screen_input = $elem->("input",
+                                type => "hidden",
+                                name => "screen",
+                                value => "Import");
+
+        $format_input = $elem->("input",
+                                type => "hidden",
+                                name => "format",
+                                value => "JSON");
+
+        $form_action = $elem->("input",
+                               type => "hidden",
+                               name => "_action_import_data",
+                               value => "Import Items");
 
         $import_form = $elem->("form",
+                               enctype => "multipart/form-data",
+                               "accept-charset" => "utf-8",
                                name => IMPORT_FORM_ID,
                                id => IMPORT_FORM_ID,
-                               action => "",
-                               method => "POST");
+                               action => IMPORT_FORM_TARGET,
+                               method => "post");
+
+        $import_form->appendChild($screen_input);
+        $import_form->appendChild($format_input);
+        $import_form->appendChild($form_action);
+
         $html->appendChild($import_form);
     }
 

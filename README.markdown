@@ -14,7 +14,10 @@ Developed for the University of Liverpool Institutional Repository. GPL licensed
 
 * Follow the steps for building the JavaScript with your API key
 * Rename `build/scripts/main.js` to `build/scripts/scopus_selector.js`
-* Copy contents of `build/scripts` to your archive's JS folder (i.e. `cfg/static/javascript`)
+* Copy contents of `build/scripts` to your archive's JS folder
+  (i.e. `cfg/static/javascript`)
+* Copy contents of `build/images` to your archive's images folder
+  (i.e. `cfg/static/images`)
 
 ## Installation
 
