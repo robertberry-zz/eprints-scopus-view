@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE phrases SYSTEM "entities.dtd">
+<!--
+
+Phrases specific to the Scopus View plug in.
+
+Author: Robert Berry <robert.berry@liverpool.ac.uk>
+
+-->
+<epp:phrases xmlns="http://www.w3.org/1999/xhtml"
+             xmlns:epp="http://eprints.org/ep3/phrase">
+  <epp:phrase id="Plugin/Screen/Scopus:title">Import from Scopus</epp:phrase>
+</epp:phrases>
