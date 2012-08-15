@@ -11,8 +11,12 @@ use EPrints::Plugin::Screen;
 use constant SEARCH_FORM_ID => "sciverse_search_form";
 use constant SEARCH_INPUT_ID => "sciverse_search_string";
 use constant RESULTS_CONTAINER_ID => "sciverse";
+use constant SPINNER_CONTAINER_ID => "sciverse_spinner";
+use constant MORE_CONTAINER_ID => "sciverse_more";
 use constant IMPORT_FORM_ID => "sciverse_submit_form";
 use constant IMPORT_FORM_TARGET => "/cgi/users/home#t";
+use constant ERRORS_CONTAINER_ID => "sciverse_errors";
+use constant BUTTON_CLASS => "ep_form_action_button";
 
 @ISA = ('EPrints::Plugin::Screen');
 
@@ -71,9 +75,13 @@ sub render {
 
     # Set up search form
     {
-        my ($search_form, $search_input, $search_submit, $submit_phrase);
+        my ($search_div, $search_form, $search_input, $search_submit, $submit_phrase,
+            $errors, $errors_box);
 
         $submit_phrase = $self->html_phrase("searchSubmit")->toString();
+
+        $search_div = $elem->("div",
+                              style => "text-align: center");
 
         $search_form = $elem->("form",
                                name => SEARCH_FORM_ID,
@@ -81,22 +89,94 @@ sub render {
                                action => "");
         $search_input = $elem->("input",
                                 type => "text",
+                                class => "ep_form_text",
                                 name => SEARCH_INPUT_ID);
         $search_submit = $elem->("input",
                                  type => "submit",
+                                 class => BUTTON_CLASS,
                                  value => $submit_phrase);
         $search_form->appendChild($search_input);
         $search_form->appendChild($search_submit);
-        $html->appendChild($search_form);
+        $search_div->appendChild($search_form);
+
+        $errors = ERRORS_CONTAINER_ID;
+        # God, I am not creating separate XML elements for every one of
+        # these. Who even does this given the language we are creating is more
+        # concise to begin with?
+        $errors_box = $session->{xml}->parse_string(qq{
+          <div id="sciverse_messages" style="display: none">
+            <div class="ep_msg_warning">
+              <div class="ep_msg_warning_content">
+                <table>
+                  <tr>
+                    <td>
+                      <img alt="Warning" src="/style/images/warning.png"
+                                         class="ep_msg_warning_icon" />
+                    </td>
+                    <td id="$errors">
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        });
+
+        $html->appendChild($search_div);
+        $html->appendChild($errors_box->documentElement());
     }
 
     # Set up results container
     {
-        my $results;
+        my ($container, $results_table, $results_row, $spinner,
+            $more, $bottom_bar, $thead);
 
-        $results = $elem->("div",
-                           id => RESULTS_CONTAINER_ID);
-        $html->appendChild($results);
+        $container = $elem->("div",
+                             class => "ep_search_results");
+        $results_table = $elem->("table",
+                                 class => "ep_columns",
+                                 cellspacing => "0",
+                                 cellpadding => "4",
+                                 border => "0",
+                                 id => RESULTS_CONTAINER_ID,
+                                 style => "display: none",
+                                 width => "100%");
+        $thead = $elem->("thead");
+        $results_row = $elem->("tr",
+                               class => "header_plain");
+
+        {
+            my (@headers, $th);
+
+            @headers = (" ", "Published", "Title", "Authors", "Source");
+
+            for my $header (@headers) {
+                $th = $elem->("th",
+                              class => "ep_columns_title");
+                $th->appendChild($session->{xml}->create_text_node($header));
+                $results_row->appendChild($th);
+            }
+        }
+
+        $thead->appendChild($results_row);
+        $results_table->appendChild($thead);
+        $container->appendChild($results_table);
+
+        $bottom_bar = $elem->("div",
+                              class => "ep_search_controls_bottom",
+                              style => "min-height: 50px; display: none");
+
+        $spinner = $elem->("span",
+                           id => SPINNER_CONTAINER_ID);
+
+        $more = $elem->("span",
+                        id => MORE_CONTAINER_ID);
+
+        $bottom_bar->appendChild($spinner);
+        $bottom_bar->appendChild($more);
+
+        $html->appendChild($container);
+        $html->appendChild($bottom_bar);
     }
 
     # Set up import form
